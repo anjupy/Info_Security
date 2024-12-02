@@ -9,14 +9,23 @@ def embed_data_in_image(uploaded_image, data, output_path):
         pixels = image.load()  # Load the image pixels
 
         # Convert the encrypted data into binary format (8-bit)
-        binary_data = ''.join(format(byte, '08b') for byte in data.encode())
+        binary_data = ''.join(format(byte, '08b') for byte in data)  # No need to encode
 
         data_index = 0
         width, height = image.size
+
         for y in range(height):
             for x in range(width):
                 if data_index < len(binary_data):
-                    r, g, b = pixels[x, y]
+                    pixel = pixels[x, y]
+                    
+                    # Handle different image modes
+                    if len(pixel) == 3:  # RGB image
+                        r, g, b = pixel
+                    elif len(pixel) == 4:  # RGBA image
+                        r, g, b, a = pixel
+                    else:
+                        raise ValueError("Unsupported image mode")
 
                     # Modify the least significant bit of each RGB channel
                     r = (r & 0xFE) | int(binary_data[data_index])  # Alter LSB of red
@@ -31,7 +40,10 @@ def embed_data_in_image(uploaded_image, data, output_path):
                         data_index += 1
 
                     # Update the pixel with the modified values
-                    pixels[x, y] = (r, g, b)
+                    if len(pixel) == 3:
+                        pixels[x, y] = (r, g, b)
+                    elif len(pixel) == 4:
+                        pixels[x, y] = (r, g, b, a)
 
                 if data_index >= len(binary_data):
                     break

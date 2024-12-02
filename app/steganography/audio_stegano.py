@@ -16,7 +16,7 @@ def embed_data_in_audio(uploaded_audio, data, output_path):
         frame_bytes = bytearray(frames)
 
         # Convert the encrypted data into binary format (8-bit)
-        binary_data = ''.join(format(byte, '08b') for byte in data.encode())
+        binary_data = ''.join(format(byte, '08b') for byte in data)  # No need to encode
 
         # Embed the binary data into the least significant bits (LSBs) of the audio frames
         data_index = 0
